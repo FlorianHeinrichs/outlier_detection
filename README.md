@@ -22,8 +22,6 @@ The "partial" and "full" version of our proposed method are referred to as "sequ
 
 The datasets used for evaluation in the paper are available for download here: [Australian Government - Bureau of Meteorology](http://www.bom.gov.au/climate/data/)
 
-The version of the data used for the experiments is also contained in the "data" folder.
-
 ### Citation
 
 If you use this code in your own work, please cite the following paper:
