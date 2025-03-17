@@ -26,7 +26,7 @@ The datasets used for evaluation in the paper are available for download here: [
 
 If you use this code in your own work, please cite the following paper:
 
--- Citation to be added --
+Heinrichs, F., Bastian, P., & Dette, H. (2025). Sequential Outlier Detection in Non-Stationary Time Series. *arXiv preprint arXiv:2502.18038*.
 
 ### License
 
