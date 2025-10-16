@@ -118,21 +118,25 @@ def get_experiment_id(args: tuple, kwargs: dict) -> str:
     return experiment_id
 
 
-def get_data_config(n: int, n_samples: int) -> list:
+def get_data_config(n: int, n_samples: int, error_types: list = None) -> list:
     """
     Get list of all data config combinations.
 
     :param n: Length of time series.
     :param n_samples: Number of (independent) time series.
+    :param error_types: List of errors ('iid', 'ma', 'ar') to use.
     :return: List with all config combinations.
     """
+    if error_types is None:
+        error_types = ERROR_TYPES
+
     data_config = []
 
     for mean_type, mean_kwargs in MEAN_CONFIG:
         mean_kwargs = mean_kwargs.copy()
         mean_kwargs['n'] = n
 
-        for error_type in ERROR_TYPES:
+        for error_type in error_types:
             for error_dist in ERROR_DISTRIBUTIONS:
                 error_kwargs = {'n': n, 'n_samples': n_samples, 'sigma': SIGMA}
 

@@ -61,7 +61,8 @@ def get_block_maxima(X: np.ndarray, block_size: int = None,
 
 
 def get_quantile(X: np.ndarray, alpha: float | np.ndarray,
-                 block_size: int = None, method: str = 'sliding') -> np.float64:
+                 block_size: int = None, method: str = 'sliding',
+                 return_estimates: bool = False) -> np.float64 | tuple:
     """
     Estimate 1-alpha quantile(s) based on a given dataset.
 
@@ -70,7 +71,10 @@ def get_quantile(X: np.ndarray, alpha: float | np.ndarray,
     :param alpha: Level of quantile to estimate, given as float or NumPy array.
     :param block_size: Number of elements to consider for each block maximum.
     :param method: String indicating 'sliding' or 'disjoint' block maxima.
-    :return: Estimated 1-alpha quantile(s).
+    :param return_estimates: Boolean indicating whether to return estimates or
+        only the quantile.
+    :return: Estimated 1-alpha quantile(s), and possibly estimates mu, sigma and
+        gamma.
     """
     n = X.shape[-1]
 
@@ -104,8 +108,71 @@ def get_quantile(X: np.ndarray, alpha: float | np.ndarray,
     quantile[ind] = mu[ind] + sigma[ind] / gamma[ind] * (
             (- np.log(1 - alpha)) ** (-gamma[ind]) - 1)
 
+    if return_estimates:
+        return quantile, mu, sigma, gamma
+    else:
+        return quantile
 
-    return quantile
+
+def get_true_quantile(alpha: float | np.ndarray,
+                      distribution: str,
+                      n: int,
+                      std: float = 1.0,
+                      return_params: bool = False) -> np.float64 | tuple:
+    """
+    Calculate true 1-alpha quantile(s) for i.i.d. errors, depending on their
+    distribution.
+
+    :param alpha: Level of quantile to estimate, given as float or NumPy array.
+    :param distribution: Distribution of i.i.d. errors.
+        - 'normal': N(0, 1).
+        - 'uniform': \sqrt(12) * (X - 1/2), X ~ U(0, 1)
+        - 'exponential': Exp(1) - 1
+        - 'pareto': \sqrt(9/2) * (X - 1/3), X ~ Par(4)
+        - 'pareto_infinite_variance': Par(2) - 1
+    :param n: Number of independent errors.
+    :param std: Standard deviation of errors.
+    :param return_params: Boolean indicating whether to return the true
+        parameter \theta = (a_n \mu + b_n, a_n \sigma, \gamma).
+    :return: True 1-alpha quantile(s), and possibly parameters.
+    """
+
+    if distribution == 'normal':
+        mu = (np.sqrt(2 * np.log(2 * n))
+              - (np.log(np.log(2 * n)) + np.log(4 * np.pi))
+              / (2 * np.sqrt(2 * np.log(2 * n))))
+        sigma = 1 / np.sqrt(2 * np.log(2 * n))
+        gamma = 0
+    elif distribution == 'uniform':
+        mu =  np.sqrt(3)
+        sigma = np.sqrt(12) / (2 * n)
+        gamma = -1
+    elif distribution == 'exponential':
+        mu = np.log(n) - 1
+        sigma = 1
+        gamma = 0
+    elif distribution == 'pareto':
+        mu = 3 / np.sqrt(2) * n ** (1 / 4)
+        sigma = mu / 4
+        gamma = 1 / 4
+    elif distribution == 'pareto_infinite_variance':
+        mu = np.sqrt(n)
+        sigma = mu / 2
+        gamma = 1 / 2
+    else:
+        raise ValueError(f"{distribution=} unknown.")
+
+    mu, sigma = mu * std, sigma * std
+
+    if gamma == 0:
+        quantile = mu - sigma * np.log(- np.log(1 - alpha))
+    else:
+        quantile = mu + sigma / gamma * ((- np.log(1 - alpha)) ** (-gamma) - 1)
+
+    if return_params:
+        return quantile, mu, sigma, gamma
+    else:
+        return quantile
 
 
 def get_estimators(M: np.ndarray) -> tuple:

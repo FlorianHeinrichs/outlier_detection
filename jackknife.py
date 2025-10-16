@@ -62,7 +62,7 @@ def nadaraya_watson_estimation(X: np.ndarray, bw: int | np.ndarray,
 
 
 def bandwidth_cv(X: np.ndarray, num_folds: int, min_bw: int, max_bw: int,
-                 step_size: int = 1) -> np.ndarray:
+                 step_size: int = 1, shuffle: bool = True) -> np.ndarray:
     """
     Function to tune the bandwidth of the local linear estimator. If multiple
     time series are provided, the calculations are done in parallel.
@@ -72,12 +72,18 @@ def bandwidth_cv(X: np.ndarray, num_folds: int, min_bw: int, max_bw: int,
     :param min_bw: Minimal bandwidth of the estimator.
     :param max_bw: Maximal bandwidth of the estimator.
     :param step_size: Step size of bandwidth. Defaults to 1.
+    :param shuffle: Indicator whether to shuffle indices, that is draw random
+        observations. Defaults to "False", to account for dependence.
     :return: Returns the optimal bandwidth(s) given as numpy array.
     """
-    indices = np.arange(X.shape[-1])
-    indices_copy = indices.copy()
-    np.random.shuffle(indices_copy)
-    folds = np.split(indices_copy, num_folds)
+    n = X.shape[-1]
+    indices = np.arange(n)
+    indices_split = np.arange(n // num_folds * num_folds)
+
+    if shuffle:
+        np.random.shuffle(indices_split)
+
+    folds = np.split(indices_split, num_folds)
     n_samples = X.shape[:-1] if len(X.shape) > 1 else 1
 
     best_bw = - np.ones(n_samples, dtype=int), - np.ones(n_samples)
@@ -139,7 +145,7 @@ def full_lle(X: np.ndarray, bw: int | np.ndarray) -> np.ndarray:
 
 
 def single_lle(X: np.ndarray, bw: int | np.ndarray,
-               mask: np.ndarray) -> np.ndarray:
+               mask: np.ndarray = None) -> np.ndarray:
     """
     Function to calculate the local linear estimator. If multiple time series
     are provided, the calculations are done in parallel.
@@ -151,6 +157,9 @@ def single_lle(X: np.ndarray, bw: int | np.ndarray,
     """
     if isinstance(bw, (int, np.int32)):
         bw = np.array(X.shape[0] * [bw])
+
+    if mask is None:
+        return full_lle(X, bw)
 
     expand_dims = len(X.shape) == 1
 

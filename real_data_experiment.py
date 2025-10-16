@@ -1,5 +1,5 @@
 #
-# experiments.py
+# real_data_experiment.py
 #
 # Project: Outlier Detection in Time Series
 # Date: 2025-01-18
@@ -24,7 +24,7 @@ def load_data(city: str) -> pd.DataFrame:
              'Sydney': '066062'}
 
     code = codes[city]
-    filepath = f"data/IDCJAC0010_{code}_1800_Data.csv"
+    filepath = f"../data/IDCJAC0010_{code}_1800_Data.csv"
     df = pd.read_csv(filepath)
     data = df.iloc[:, 2:6]
     data.rename(columns={'Maximum temperature (Degree C)': 'Temperature'},
@@ -78,21 +78,6 @@ def experiment(data: np.ndarray, m_stable: int,
     results.update(alternatives)
 
     return results
-
-
-def find_nan_segments(data):
-    mask = np.isnan(data).astype(int)
-    segments = []
-
-    if np.any(mask):
-        mask_pad = np.concatenate(([False], mask, [False]))
-        starts = np.where(np.diff(mask_pad) == 1)[0]
-        ends = np.where(np.diff(mask_pad) == -1)[0] - 1
-
-        segments = [(start, end, end - start + 1)
-                    for start, end in zip(starts, ends)]
-
-    return segments
 
 
 def impute_nans(data, initial_period: int = 365, min_nans: int = 3) -> tuple:
