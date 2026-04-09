@@ -26,13 +26,14 @@ The datasets used for evaluation in the paper are available for download here: [
 
 If you use this code in your own work, please cite the following pre-print (or the peer reviewed paper, once available):
 
-Heinrichs, F., Bastian, P., & Dette, H. (2025). Sequential Outlier Detection in Non-Stationary Time Series. *arXiv preprint arXiv:2502.18038*.
+Heinrichs, F., Bastian, P., & Dette, H. (2025). Sequential Outlier Detection in Nonstationary Time Series. *Journal of time series analysis*.
 
     @article{heinrichs2025sequential,
-      title={Sequential Outlier Detection in Non-Stationary Time Series},
+      title={Sequential outlier detection in nonstationary time series},
       author={Heinrichs, Florian and Bastian, Patrick and Dette, Holger},
-      journal={arXiv preprint arXiv:2502.18038},
-      year={2025}
+      journal={Journal of time series analysis},
+      year={2025},
+      publisher={Wiley Online Library}
     }
 
 ### License
